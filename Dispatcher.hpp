@@ -127,12 +127,12 @@ namespace lk
         {
             for (auto& pair : handlers)
             {
-                pair.second (std::forward (args...));
+                pair.second (args...);
             }
             
             for (auto& member_handler : member_handlers)
             {
-                member_handler->call (std::forward (args...));
+                member_handler->call (args...);
             }
         }
     };
