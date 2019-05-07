@@ -35,61 +35,10 @@
 namespace lk
 {
     template<typename... _ArgTypes>
-    class MemberHandlerParent
-    {
-        /*
-         * We need the pointers one and two so that we can compare handlers.
-         * This is a really ugly way to do it, but it's the only way.
-         */
-        void* one;
-        void* two;
-    public:
-        MemberHandlerParent (void* one, void* two)
-            : one (one), two (two)
-        {}
-        
-        virtual void call (_ArgTypes...) = 0;
-    
-        bool operator== (const MemberHandlerParent& rhs) const
-        {
-            return one == rhs.one && two == rhs.two;
-        }
-    
-        bool operator!= (const MemberHandlerParent& rhs) const
-        {
-            return !(rhs == *this);
-        }
-    };
+    class MemberHandlerParent;
     
     template<typename _T, typename... _ArgTypes>
-    class MemberHandler 
-        : public MemberHandlerParent<_ArgTypes...>
-    {
-    private:
-        _T* obj;
-        void (_T::*func) (_ArgTypes...);
-    public:
-        MemberHandler (_T* obj, void (_T::*func) (_ArgTypes...))
-            : obj (obj), func (func), MemberHandlerParent<_ArgTypes...> ((void*) obj, (void*) func)
-        {
-        }
-        
-        void call (_ArgTypes... args) override
-        {
-            (obj->*func) (args...);
-        }
-    
-        bool operator== (const MemberHandler& rhs)
-        {        
-            return static_cast<const lk::MemberHandlerParent<_ArgTypes...>&>(*this) ==
-                   static_cast<const lk::MemberHandlerParent<_ArgTypes...>&>(rhs) && obj == rhs.obj && func == rhs.func;
-        }
-    
-        bool operator!= (const MemberHandler& rhs) const
-        {
-            return !(rhs == *this);
-        }
-    };
+    class MemberHandler;
     
     /// Dispatcher is a minimalistic event dispatcher.
     /// Functions and Methods (member-functions) can be subscribed to a 
@@ -185,6 +134,63 @@ namespace lk
             {
                 member_handler->call (std::forward (args...));
             }
+        }
+    };
+    
+    template<typename... _ArgTypes>
+    class MemberHandlerParent
+    {
+        /*
+         * We need the pointers one and two so that we can compare handlers.
+         * This is a really ugly way to do it, but it's the only way AFAIK.
+         */
+        void* one;
+        void* two;
+    public:
+        MemberHandlerParent (void* one, void* two)
+            : one (one), two (two)
+        {}
+        
+        virtual void call (_ArgTypes...) = 0;
+        
+        bool operator== (const MemberHandlerParent& rhs) const
+        {
+            return one == rhs.one && two == rhs.two;
+        }
+        
+        bool operator!= (const MemberHandlerParent& rhs) const
+        {
+            return !(rhs == *this);
+        }
+    };
+    
+    template<typename _T, typename... _ArgTypes>
+    class MemberHandler
+        : public MemberHandlerParent<_ArgTypes...>
+    {
+    private:
+        _T* obj;
+        void (_T::*func) (_ArgTypes...);
+    public:
+        MemberHandler (_T* obj, void (_T::*func) (_ArgTypes...))
+            : obj (obj), func (func), MemberHandlerParent<_ArgTypes...> ((void*) obj, (void*) func)
+        {
+        }
+        
+        void call (_ArgTypes... args) override
+        {
+            (obj->*func) (args...);
+        }
+        
+        bool operator== (const MemberHandler& rhs)
+        {
+            return static_cast<const lk::MemberHandlerParent<_ArgTypes...>&>(*this) ==
+                   static_cast<const lk::MemberHandlerParent<_ArgTypes...>&>(rhs) && obj == rhs.obj && func == rhs.func;
+        }
+        
+        bool operator!= (const MemberHandler& rhs) const
+        {
+            return !(rhs == *this);
         }
     };
 }
