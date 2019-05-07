@@ -145,9 +145,9 @@ namespace lk
          * This is a really ugly way to do it, but it's the only way AFAIK.
          */
         void* one;
-        void* two;
+        void (*two)();
     public:
-        MemberHandlerParent (void* one, void* two)
+        MemberHandlerParent (void* one, void (*two)())
             : one (one), two (two)
         {}
         
@@ -173,7 +173,7 @@ namespace lk
         void (_T::*func) (_ArgTypes...);
     public:
         MemberHandler (_T* obj, void (_T::*func) (_ArgTypes...))
-            : obj (obj), func (func), MemberHandlerParent<_ArgTypes...> ((void*) obj, (void*) func)
+            : obj (obj), func (func), MemberHandlerParent<_ArgTypes...> ((void*) obj, (void (*)()) (obj->*func))
         {
         }
         
