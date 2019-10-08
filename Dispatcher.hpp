@@ -75,7 +75,7 @@ namespace lk
         /// \param func Handler function.
         void operator+= (SignaturePtr func)
         {
-            handlers.insert (std::pair ((void*) func, func));
+            handlers.insert (std::pair (static_cast<void*>(func), func));
         }
         
         /// Subscribes a member function to the Dispatcher as an Event-Handler.
@@ -114,7 +114,7 @@ namespace lk
         /// \param func Handler function.
         void operator-= (SignaturePtr func)
         {
-            auto key = (void*) func;
+            auto key = static_cast<void*>(func);
             if (handlers.find (key) != handlers.end ())
             {
                 handlers.erase (key);
@@ -173,7 +173,7 @@ namespace lk
         void (_T::*func) (_ArgTypes...);
     public:
         MemberHandler (_T* obj, void (_T::*func) (_ArgTypes...))
-            : obj (obj), func (func), MemberHandlerParent<_ArgTypes...> ((void*) obj, (void (*)()) (obj->*func))
+            : obj (obj), func (func), MemberHandlerParent<_ArgTypes...> (static_cast<void*>(obj), (void (*)()) (obj->*func))
         {
         }
         
